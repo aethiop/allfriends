@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="./style.css" />
+    <title>All friends</title>
+</head>
+<style>
+    /*
+		Choose white text on a black background so you can add color in.
+		Pick your favorite font and choose a font size.
+	*/
+    @import url('https://fonts.googleapis.com/css2?family=Dosis:wght@200;300;400;500;600;700;800&display=swap');
+
+    html,
+    body {
+        font-family: "Dosis", sans-serif;
+    }
+
+    [contenteditable]:focus {
+        outline: none;
+    }
+</style>
+
+<body class="black whitet">
+
+    <!-- Welcome Screen -->
+    <div class="hold full hue2" id="app">
+        <div class="center" id="welcome">
+            <h1 class="fat">All<span class="blackt">Friends</span></h1>
+            <div style="padding-bottom: 2rem;">
+                <div class="center" style="width: 70%" id="register-section">
+                    <input class="crack center inside row" type="text" id="username" placeholder="Enter Username" />
+                    <button class="white blackt sap row higher" id="register-button">Register</button>
+                </div>
+                <div>
+                    <div class="center" id="login-section" style="display: none; width:70%">
+                        <input class="crack center inside row" type="text" id="key" placeholder="Paste Key" />
+                        <button class="white blackt sap row higher" id="login-button">Login</button>
+                    </div>
+                </div>
+            </div>
+            <button style="cursor:pointer; display: none" onMouseOver="this.style.color='#ffffff1f'"
+                onMouseOut="this.style.color='#ffffff4f'" class=" row" id="forgot-navigate">Lost Key?</button>
+            <button style="cursor:pointer" class="whitet sit" id="login-navigate">Already have an account?</button>
+            <button class="whitet row" id="register-navigate" style="display: none;cursor:pointer">Create an
+                account!</button>
+        </div>
+        <div id="home" style="display: none">
+            <div class="page center" style="width: 70%">
+                <h1 id="title"></h1>
+                <p class="tintt">Enter public key of your friends (3 to 5 unique friends)</p>
+                <div id="friends" class="crack " style="display: flex; flex-direction: column;">
+                    <div id="f1" class="center blackt bolder">F!
+                    </div>
+                    <div id="f1" class="center blackt bolder">F!
+                    </div>
+                    <div id="f1" class="center blackt bolder">F!
+                    </div>
+                    <input />
+
+
+                    <!-- <div style="width:100%; display: flex;">
+                        <input class="crack row" placeholder="Friend 1" type="text" id="f1" />
+                        <button class="blackt white sap crack spacing-x" id="setup">Save</button>
+                    </div>
+                    <div style="width:100%; display: flex;">
+                        <input class="crack" placeholder="Friend 2" type="text" id="f2" />
+                        <button class="blackt white sap crack spacing-x" id="setup">Save</button>
+                    </div>
+                    <div style="width:100%; display: flex;">
+                        <input class="crack" placeholder="Friend 3" type="text" id="f3" />
+                        <button class="blackt white sap crack spacing-x" id="setup">Save</button>
+                    </div> -->
+                </div>
+                <div class="spacing-x">
+                    <button class="shade whitet sap " id="logout-button">Logout</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+<script src="https://cdn.jsdelivr.net/npm/gun/gun.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/gun/lib/then.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/gun/lib/path.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/gun/lib/promise.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/gun/sea.js"></script>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/gun/lib/fun.js"></script>
+<!-- <script src="https://cdn.jsdelivr.net/npm/gun/as.js"></script> -->
+<!-- <script src="https://cdn.jsdelivr.net/npm/joydb/joy.min.js"></script> -->
+<script src="./secrets.min.js"></script>
+<script>
+    $(document).ready(function () {
+        var gun = Gun({
+            peers: ["http://localhost:8765/gun"]
+        })
+        var user = gun.user();
+        var profile = { username: '' }
+        var app = gun.get("topica")
+        const swap = (current, next) => {
+            $("#" + current).hide()
+            $("#" + next).show()
+        }
+
+        function encode(buffer) {
+            return buffer.toString('base64')
+                .replace(/\+/g, '-')
+                .replace(/\//g, '_')
+                .replace(/=+$/, '');
+
+        }
+        function decode(base64) {
+            base64 += Array(5 - base64.length % 4).join('=');
+            base64 = base64
+                .replace(/\-/g, '+')
+                .replace(/\_/g, '/');
+            return new Buffer(base64, 'base64');
+        }
+
+        // Checking if already logged in
+        const checkLocalStorage = () => {
+            let key = localStorage.getItem("userkey") || null
+            key && login(JSON.parse(key))
+        }
+        // Login using key
+        const login = (key) => {
+            user.auth(key);
+            localStorage.setItem("userkey", JSON.stringify(key));
+            console.log("Key: ", JSON.stringify(key));
+            if (user.is) {
+                user.get("profile")
+                    .get("name")
+                    .on((name) => {
+                        if (name && typeof name === "string") {
+                            profile.username = name
+                            $("#title").text(profile.username)
+                            swap("welcome", "home")
+
+                        }
+                    });
+            }
+        }
+        //Register account
+        const register = () => {
+            name = $("#username").val()
+
+            return SEA.pair().then(async (k) => {
+                login(k);
+                name && user.get("profile").get("name").put(name)
+                user.get("epub").put(user._.sea.epub)
+            })
+        }
+
+
+
+        const logout = () => {
+            localStorage.removeItem("userkey")
+            user.leave()
+            swap("home", "welcome")
+        }
+
+        const forgotPassword = async () => {
+            console.log("Forgot")
+            const throwAway = await SEA.pair();
+            const hash = await SEA.work(throwAway.pub, null, null, { name: "SHA-256" });
+
+            const encodedURL = encode(hash);
+            console.log("http://localhost:5500#" + encodedURL);
+            // console.log(throwAway)
+        }
+
+
+        const secretEncrypt = async (data, key, epub) => await SEA.encrypt(data, await SEA.secret(epub, key))
+        const setup3FA = async (pubF1, pubF2, pubF3) => {
+            const backupKey = secrets.random(128)
+            user.get('3fauth').put(await SEA.encrypt(user._.sea, backupKey))
+            const pieces = secrets.share(backupKey, 5, 3)
+
+            const eF1 = await gun.get("~" + pubf1).get("epub").then()
+            const eF2 = await gun.get("~" + pubF2).get("epub").then()
+            const eF3 = await gun.get("~" + pubF3).get("epub").then()
+            user.get('3fa').get(pubf1).put(secretEncrypt(pieces[0], user._.sea, eF1))
+            user.get('3fa').get(pubF2).put(secretEncrypt(pieces[1], user._.sea, eF2))
+            user.get('3fa').get(pubF3).put(secretEncrypt(pieces[2], user._.sea, eF3))
+            // console.log(secrets.combine([pieces[0], pieces[3], pieces[1]]))
+            // console.log(backupKey)
+            // console.log(await SEA.decrypt(await user.get('3fauth').then(), backupKey))
+        }
+
+
+        checkLocalStorage()
+        $("#register-button").click(register)
+        $("#login-button").click(() => {
+            login(JSON.parse($("#key").val()))
+        })
+
+        $("#logout-button").click(logout)
+        $("#login-navigate").on('click', () => {
+            swap("login-navigate", "register-navigate");
+            swap("register-section", "login-section")
+            $("#forgot-navigate").show();
+        })
+        $("#forgot-navigate").click(forgotPassword)
+
+        $("#setup").click(setup3FA)
+        $("#register-navigate").click(() => {
+            swap("register-navigate", "login-navigate");
+            swap("login-section", "register-section")
+            $("#forgot-navigate").hide();
+
+        })
+    })
+
+
+
+</script>
+
+</html>
