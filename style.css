@@ -4,7 +4,8 @@ body {
 	padding: 0;
 	position: relative;
 	line-height: 1.5;
-	font-size: max(15pt, 2vw);
+	font-size: 18pt;
+	f-ont-size: max(18pt, 2?vw);
 }
 
 div,
@@ -32,6 +33,10 @@ a,
 button,
 input,
 textarea {
+	padding-left: 0.5rem;
+	padding-right: 0.5rem;
+	padding-top: 0.25rem;
+	padding-bottom: 0.25rem;
 	background: inherit;
 	border: inherit;
 	color: inherit;
@@ -45,24 +50,9 @@ input[type="submit"]:focus {
 	animation: pulse 2s infinite;
 }
 
-input {
-	border: 1px solid rgba(31, 31, 31, 0.432);
-	background: inherit;
-	padding-top: 0.25rem;
-	padding-bottom: 0.25rem;
-	padding-left: 0.5rem;
-	padding-right: 0.5rem;
-	border-radius: 0.3em;
-}
 input:not([type="button"]):not([type="submit"]),
 textarea {
 	width: 100%;
-}
-button {
-	padding-left: 0.5rem;
-	padding-right: 0.5rem;
-	padding-top: 0.25rem;
-	padding-bottom: 0.25rem;
 }
 ::placeholder,
 .hint {
@@ -90,7 +80,6 @@ p + p {
 .none {
 	display: none;
 }
-
 .hide {
 	opacity: 0;
 	visibility: hidden;
@@ -106,11 +95,9 @@ p + p {
 .max {
 	max-width: 48em;
 }
-
 .min {
 	min-width: 12em;
 }
-
 .pad {
 	width: 95%;
 	margin: 5% auto;
@@ -122,28 +109,23 @@ p + p {
 	float: right;
 	text-align: right;
 }
-
 .left {
 	float: left;
 	text-align: left;
 }
-
 .center {
 	text-align: center;
 	vertical-align: middle;
 	margin-left: auto;
 	margin-right: auto;
 }
-
 .mid {
 	margin-left: auto;
 	margin-right: auto;
 }
-
 .top {
 	vertical-align: top;
 }
-
 .low {
 	vertical-align: bottom;
 }
@@ -151,34 +133,23 @@ p + p {
 .rim {
 	margin: 1%;
 }
-
 .gap {
 	padding: 3%;
 	padding: clamp(0.5em, 3%, 1.5em);
 }
-
 .stack {
 	line-height: 0;
 }
-
 .crack {
-	margin-bottom: 3%;
+	margin-bottom: 1%;
 }
-
 .sit {
 	margin-bottom: 0;
 }
 
-.spacing-left {
-	margin-left: 0.5rem;
-}
-.spacing-right {
-	margin-right: 0.5rem;
-}
 .row {
 	width: 100%;
 }
-
 .col {
 	max-width: 24em;
 	min-width: 12em;
@@ -194,7 +165,6 @@ p + p {
 .leak {
 	overflow: visible;
 }
-
 .hold {
 	overflow: hidden;
 }
@@ -214,7 +184,7 @@ p + p {
 	vertical-align: inherit;
 }
 .sap {
-	border-radius: 0.3em;
+	border-radius: 0.1em;
 }
 .jot {
 	border-bottom: 1px dashed #95b2ca;
@@ -250,7 +220,6 @@ p + p {
 .shade {
 	background: rgba(0%, 0%, 0%, 0.1);
 }
-
 .tint {
 	background: rgba(100%, 100%, 100%, 0.1);
 }
@@ -276,8 +245,8 @@ p + p {
 
 .hue {
 	background: #4d79d8;
-	-webkit-animation: hue 45s infinite;
-	animation: hue 45s infinite;
+	-webkit-animation: hue 900s infinite;
+	animation: hue 900s infinite;
 }
 @keyframes hue {
 	0% {
@@ -316,8 +285,8 @@ p + p {
 
 .huet {
 	color: #4d79d8;
-	-webkit-animation: huet 45s infinite;
-	animation: huet 45s infinite;
+	-webkit-animation: huet 900s infinite;
+	animation: huet 900s infinite;
 }
 @keyframes huet {
 	0% {
@@ -356,8 +325,8 @@ p + p {
 
 .hue2 {
 	background: #ea3224;
-	-webkit-animation: hue2 45s infinite;
-	animation: hue2 45s infinite;
+	-webkit-animation: hue2 900s infinite;
+	animation: hue2 900s infinite;
 }
 @keyframes hue2 {
 	0% {
@@ -396,8 +365,8 @@ p + p {
 
 .huet2 {
 	color: #ea3224;
-	-webkit-animation: huet2 45s infinite;
-	animation: huet2 45s infinite;
+	-webkit-animation: huet2 900s infinite;
+	animation: huet2 900s infinite;
 }
 @keyframes huet2 {
 	0% {
@@ -436,8 +405,8 @@ p + p {
 
 .hue3 {
 	background: #33cc33;
-	-webkit-animation: hue3 45s infinite;
-	animation: hue3 45s infinite;
+	-webkit-animation: hue3 900s infinite;
+	animation: hue3 900s infinite;
 }
 @keyframes hue3 {
 	0% {
@@ -476,8 +445,8 @@ p + p {
 
 .huet3 {
 	color: #33cc33;
-	-webkit-animation: huet3 45s infinite;
-	animation: huet3 45s infinite;
+	-webkit-animation: huet3 900s infinite;
+	animation: huet3 900s infinite;
 }
 @keyframes huet3 {
 	0% {
@@ -516,8 +485,8 @@ p + p {
 
 .hue4 {
 	background: #d3a438;
-	-webkit-animation: hue4 45s infinite;
-	animation: hue4 45s infinite;
+	-webkit-animation: hue4 900s infinite;
+	animation: hue4 900s infinite;
 }
 @keyframes hue4 {
 	0% {
@@ -556,8 +525,8 @@ p + p {
 
 .huet4 {
 	color: #d3a438;
-	-webkit-animation: huet4 45s infinite;
-	animation: huet4 45s infinite;
+	-webkit-animation: huet4 900s infinite;
+	animation: huet4 900s infinite;
 }
 @keyframes huet4 {
 	0% {
@@ -637,53 +606,4 @@ p + p {
 	padding: 0;
 	position: absolute;
 	width: 1px;
-}
-
-/* Added CSS */
-
-.thin {
-	font-weight: 100;
-}
-.lighter {
-	font-weight: 200;
-}
-.light {
-	font-weight: 300;
-}
-.normal {
-	font-weight: 400;
-}
-.medium {
-	font-weight: 500;
-}
-.bold {
-	font-weight: 600;
-}
-.bolder {
-	font-weight: 700;
-}
-.fat {
-	font-weight: 800;
-}
-.tintt {
-	color: rgba(255, 255, 255, 0.2);
-}
-.shadet {
-	color: rgba(0, 0, 0, 0.2);
-}
-
-.up {
-	box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
-}
-.high {
-	box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1),
-		0 2px 4px -1px rgba(0, 0, 0, 0.06);
-}
-.higher {
-	box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1),
-		0 4px 6px -2px rgba(0, 0, 0, 0.05);
-}
-.highest {
-	box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1),
-		0 10px 10px -5px rgba(0, 0, 0, 0.04);
 }
