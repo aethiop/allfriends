@@ -96,7 +96,7 @@
 <script>
 
     const gun = Gun({
-        peers: ["http://localhost:8765/gun"]
+        peers: ["https://marda.herokuapp.com/gun"]
     })
     const nug = Gun({
         peers: ["http://localhost:8765/gun"]
@@ -106,10 +106,8 @@
         key: {},
         secretPubs: []
     }
-    const lost = {}
+
     const user = gun.user();
-    const app = gun.get("topica")
-    const BASEURL = "http://localhost:5500"
 
 
     //Helpers
