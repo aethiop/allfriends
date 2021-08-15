@@ -19,10 +19,6 @@
     body {
         font-family: "Dosis", sans-serif;
     }
-
-    [contenteditable]:focus {
-        outline: none;
-    }
 </style>
 
 <body class="black whitet">
@@ -31,190 +27,265 @@
     <div class="hold full hue2" id="app">
         <div class="center" id="welcome">
             <h1 class="fat">All<span class="blackt">Friends</span></h1>
-            <div style="padding-bottom: 2rem;">
-                <div class="center" style="width: 70%" id="register-section">
-                    <input class="crack center inside row" type="text" id="username" placeholder="Enter Username" />
-                    <button class="white blackt sap row higher" id="register-button">Register</button>
-                </div>
-                <div>
-                    <div class="center" id="login-section" style="display: none; width:70%">
-                        <input class="crack center inside row" type="text" id="key" placeholder="Paste Key" />
-                        <button class="white blackt sap row higher" id="login-button">Login</button>
-                    </div>
+            <div class="center" style="width: 50%" id="register-section">
+                <input class="crack center inside row" type="text" id="username" placeholder="Enter Username" />
+                <button class="white blackt sap row higher " id="register-button" onclick="register()">Register</button>
+            </div>
+            <div class="crack">
+                <div class="center" id="login-section" style="display: none; width:50%">
+                    <input class="crack center inside row" type="text" id="key" placeholder="Paste Key" />
+                    <button class="white blackt sap row higher" id="login-button"
+                        onclick="login(JSON.parse($('#key').val()))">Login</button>
                 </div>
             </div>
             <button style="cursor:pointer; display: none" onMouseOver="this.style.color='#ffffff1f'"
-                onMouseOut="this.style.color='#ffffff4f'" class=" row" id="forgot-navigate">Lost Key?</button>
+                onMouseOut="this.style.color='#ffffff99'" class=" row" id="forgot-navigate">Lost Key?</button>
             <button style="cursor:pointer" class="whitet sit" id="login-navigate">Already have an account?</button>
             <button class="whitet row" id="register-navigate" style="display: none;cursor:pointer">Create an
                 account!</button>
         </div>
         <div id="home" style="display: none">
-            <div class="page center" style="width: 70%">
+            <div class="page center" style="width: 50%">
                 <h1 id="title"></h1>
+                <button class="whitet black sap crack" onclick="navigator.clipboard.writeText(profile.key.pub)">Copy
+                    Public Address</button>
                 <p class="tintt crack thin">Enter public key of your friends (3 to 5 unique friends)</p>
-                <div id="friends" class="crack " style="display: flex; flex-direction: column;">
+                <div class="crack " style="display: flex; flex-direction: column;">
+                    <div class="crack" id="friends"></div>
                     <input class="crack row" placeholder="Enter public key of your friend" type="text" id="pub" />
-                    <button class="blackt white sap crack" id="addPub">Add</button>
-
-                    <!-- <div style="width:100%; display: flex;">
-                        <input class="crack row" placeholder="Friend 1" type="text" id="f1" />
-                        <button class="blackt white sap crack spacing-x" id="setup">Save</button>
-                    </div>
-                    <div style="width:100%; display: flex;">
-                        <input class="crack" placeholder="Friend 2" type="text" id="f2" />
-                        <button class="blackt white sap crack spacing-x" id="setup">Save</button>
-                    </div>
-                    <div style="width:100%; display: flex;">
-                        <input class="crack" placeholder="Friend 3" type="text" id="f3" />
-                        <button class="blackt white sap crack spacing-x" id="setup">Save</button>
-                    </div> -->
+                    <button class="blackt white sap crack" id="addPub" onclick="addPubs()">Add</button>
+                    <button class="hide whitet black sap crack" id="setup3FA" onclick="setup3FA()">Submit</button>
                 </div>
-                <div class="spacing-x">
-                    <button class="shade whitet sap " id="logout-button">Logout</button>
+                <div class="">
+                    <button class="shade whitet sap crack" id="logout-button" onclick="logout()">Logout</button>
+                    <button class="shade whitet sap crack" id="lookout" onclick="swap('home', 'lost')">LookUp</button>
                 </div>
             </div>
         </div>
+
+        <div id="lost" class="center" style="display: none">
+            <h1 class="fat">Lost<span class="blackt">Key?</span></h1>
+            <div class="center" style="width: 50%" id="register-section">
+                <input class="crack center inside row" type="text" id="lostPub" placeholder="Enter Your public key" />
+                <button class="white blackt sap row " id="forgot-button" onclick="forgotPassword()">Share
+                    URL</button>
+            </div>
+        </div>
+        <div id="help" class="center" style="display: none">
+            <h1 class="fat">Is <span class="blackt" id="lostUsername"></span> the one who sent you the link?</h1>
+            <div class="center" style="width: 50%" display:flex; direction: column; justify-content: center; width:
+                50%">
+                <button id="accept" class="white blackt sap crack row">Yes</button>
+                <button id="ignore" class="black whitet sap row">Go Back</button>
+            </div>
+        </div>
+        <div id="waiting" class="center" style="display: none">
+            <p id="status" class="fat">Waiting for approval</p>
+            <div class="center" style="width: 50%" id="goback-container"></div>
+        </div>
     </div>
 </body>
+
 <script src="https://cdn.jsdelivr.net/npm/gun/gun.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/gun/lib/then.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/gun/lib/path.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/gun/lib/promise.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/gun/sea.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/gun/lib/then.js"></script>
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/gun/lib/fun.js"></script>
-<!-- <script src="https://cdn.jsdelivr.net/npm/gun/as.js"></script> -->
-<!-- <script src="https://cdn.jsdelivr.net/npm/joydb/joy.min.js"></script> -->
 <script src="./secrets.min.js"></script>
+
 <script>
-    $(document).ready(function () {
-        var gun = Gun({
-            peers: ["http://localhost:8765/gun"]
+
+    const gun = Gun({
+        peers: ["http://localhost:8765/gun"]
+    })
+    const nug = Gun({
+        peers: ["http://localhost:8765/gun"]
+    });
+    const profile = {
+        username: "",
+        key: {},
+        secretPubs: []
+    }
+    const lost = {}
+    const user = gun.user();
+    const app = gun.get("topica")
+    const BASEURL = "http://localhost:5500"
+
+
+    //Helpers
+    const swap = (current, next) => {
+        $("#" + current).hide()
+        $("#" + next).show()
+    }
+
+    const appendUser = (to, name, pub) => {
+        var user = `<div id='${pub}' class="bolder blackt"> ${name}</div>`;
+        to.append(user)
+    }
+
+    //Register account
+    const register = () => {
+        var name = $("#username").val()
+        return SEA.pair().then(async (k) => {
+            login(k)
+            name && user.get("profile").get("name").put(name)
+            user.get("epub").put(user._.sea.epub)
+            $("#username").val("")
         })
-        var user = gun.user();
-        var app = gun.get("topica")
-        const swap = (current, next) => {
-            $("#" + current).hide()
-            $("#" + next).show()
-        }
 
-        function encode(buffer) {
-            return buffer.toString('base64')
-                .replace(/\+/g, '-')
-                .replace(/\//g, '_')
-                .replace(/=+$/, '');
+    }
+    // Login using key
+    const login = async (key) => {
+        user.auth(key);
 
+        localStorage.setItem("userkey", JSON.stringify(key));
+        console.log("Key: ", JSON.stringify(key));
+        if (user.is) {
+            var username = await user.get("profile").get("name").then()
+            $("#title").html(`Welcome <span class="blackt">${username}</span>`)
+            profile.username = username
+            profile.key = key;
+            swap("welcome", "home")
         }
-        function decode(base64) {
-            base64 += Array(5 - base64.length % 4).join('=');
-            base64 = base64
-                .replace(/\-/g, '+')
-                .replace(/\_/g, '/');
-            return new Buffer(base64, 'base64');
-        }
+        $("#key").val("")
+        $("#waiting").hide()
+    }
 
-        // Checking if already logged in
-        const checkLocalStorage = () => {
-            let key = localStorage.getItem("userkey") || null
-            key && login(JSON.parse(key))
-        }
-        // Login using key
-        const login = async (key) => {
-            user.auth(key);
-            localStorage.setItem("userkey", JSON.stringify(key));
-            console.log("Key: ", JSON.stringify(key));
-            if (user.is) {
-                $("#title").text("Welcome, " + await user.get("profile").get("name").then())
-                swap("welcome", "home")
-
+    const addPubs = async () => {
+        var pub = $("#pub").val()
+        var name = await gun.user(pub).get("profile").get("name").then()
+        if (name) {
+            if (!(profile.secretPubs.includes(pub)) && pub != profile.pub) {
+                appendUser($("#friends"), name, pub)
             }
-        }
-
-        const addPubs = async (pub) => {
-
-            var name = await gun.user(pub).get("profile").get("name").then()
-            var friend = `<div id=${pub} class="bolder blackt ">${name}</div>`;
-            if (name) {
-                $("#friends").prepend(friend);
+            else {
+                console.log("error")
             }
+            profile.secretPubs.length >= 2 && $("#setup3FA").removeClass("hide")
+            profile.secretPubs = [...profile.secretPubs, pub]
         }
-        //Register account
-        const register = () => {
-            name = $("#username").val()
+        $("#pub").val("")
 
-            return SEA.pair().then(async (k) => {
-                login(k);
-                name && user.get("profile").get("name").put(name)
-                user.get("epub").put(user._.sea.epub)
+
+    }
+
+
+    const forgotPassword = async () => {
+        // Get the public key 
+        var pub = $("#lostPub").val()
+        var name = await gun.user(pub).get('profile').get('name').then()
+        console.log(name)
+
+        // Create a throwaway key and encrypt the pub with the key
+        var throwaway = await SEA.pair();
+
+        var hash = await SEA.work(throwaway.pub, null, null, { name: "SHA-256", encode: 'hex' });
+
+        var encData = await SEA.encrypt(pub, throwaway)
+
+
+        gun.get("lost").get(hash).put(encData)
+
+        var url = `${location.href}?p=${throwaway.epriv}#${hash}`
+        navigator.clipboard.writeText(url).then(() => {
+            $("#forgot-button").html("Copied URL")
+        })
+        history.pushState({}, '', url)
+        location.reload()
+
+        $("#lostPub").val("")
+
+    }
+
+    const logout = () => {
+        localStorage.removeItem("userkey")
+        user.leave()
+        swap("home", "welcome")
+    }
+
+    // Encryptes deffie helman encryption with key and epub of the shared instance
+    const secretEncrypt = async (data, key, epub) => await SEA.encrypt(data, await SEA.secret(epub, key))
+    const secretDecrypt = async (data, key, epub) => await SEA.decrypt(data, await SEA.secret(epub, key))
+    const setup3FA = async () => {
+        if (profile.secretPubs.length >= 3) {
+            const backupKey = SEA.random(128).toString('hex')
+            user.get('3fauth').put(await SEA.encrypt(user._.sea, backupKey))
+            const pieces = secrets.share(backupKey, 5, 3)
+            profile.secretPubs.forEach(async (pub, index) => {
+                const epub = await gun.get(`~${pub}`).get("epub").then()
+                var encrypted = await secretEncrypt(pieces[index], user._.sea, epub)
+                user.get('3fa').get(pub).put(encrypted)
             })
         }
+    }
+    const helpFriend = async () => {
+        if (window.location.search) {
+            var pass = new URLSearchParams(window.location.search).get("p");
+            var hash = window.location.hash.slice(1)
+            var lostPub = await SEA.decrypt(await gun.get('lost').get(hash).then(), pass);
+            var lostEpub = await gun.get(`~${lostPub}`).get("epub").then()
+            var lostUsername = await gun.user(lostPub).get("profile").get("name").then()
+            if (user.is) {
+                swap("home", "help")
+                var decryptedPiece = await secretDecrypt(await gun.user(lostPub).get('3fa').get(profile.key.pub).then(), profile.key, lostEpub)
+                $("#lostUsername").text(lostUsername)
+                $("#accept").click(() => {
+                    gun.get("approvals").get(hash).set(decryptedPiece)
+                })
+            }
+            else {
+                swap("welcome", "waiting")
+                var piecesFound = []
+                gun.get("approvals").get(hash).map().on(async data => {
+                    piecesFound = [...piecesFound, data]
+                    if (piecesFound.length == 3) {
+                        var backup = secrets.combine(piecesFound)
+                        var authKey = await SEA.decrypt(await gun.user(lostPub).get('3fauth').then(), backup)
+                        var buttonLogin = `<button class="white blackt sap" id="backIn">Login</button>`
+                        $("#status").text("Found your key: " + JSON.stringify(authKey))
+                        $("#goback-container").append(buttonLogin)
+                        $("#backIn").click(() => {
+                            login(authKey)
+                            window.location.href = "/";
+                        })
+                    }
+                })
 
 
-
-        const logout = () => {
-            localStorage.removeItem("userkey")
-            user.leave()
-            swap("home", "welcome")
+            }
         }
 
-        const forgotPassword = async () => {
-            console.log("Forgot")
-            const throwAway = await SEA.pair();
-            console.log(throwAway)
+    }
 
-            const hash = await SEA.work(throwAway.pub, null, null, { name: "SHA-256" });
+    $("#ignore").click(() => {
+        window.location.href = "/"
+    })
+    const init = async () => {
 
-            const encodedURL = encode(hash);
-            console.log("http://localhost:5500#" + encodedURL);
-            // console.log(throwAway)
-        }
+        // Check local storage for key
 
-
-        const secretEncrypt = async (data, key, epub) => await SEA.encrypt(data, await SEA.secret(epub, key))
-        // const setup3FA = async (pubF1, pubF2, pubF3) => {
-        //     const backupKey = secrets.random(128)
-        //     user.get('3fauth').put(await SEA.encrypt(user._.sea, backupKey))
-        //     const pieces = secrets.share(backupKey, 5, 3)
-
-        //     const eF1 = await gun.get("~" + pubf1).get("epub").then()
-        //     const eF2 = await gun.get("~" + pubF2).get("epub").then()
-        //     const eF3 = await gun.get("~" + pubF3).get("epub").then()
-        //     user.get('3fa').get(pubf1).put(secretEncrypt(pieces[0], user._.sea, eF1))
-        //     user.get('3fa').get(pubF2).put(secretEncrypt(pieces[1], user._.sea, eF2))
-        //     user.get('3fa').get(pubF3).put(secretEncrypt(pieces[2], user._.sea, eF3))
-        //     // console.log(secrets.combine([pieces[0], pieces[3], pieces[1]]))
-        //     // console.log(backupKey)
-        //     // console.log(await SEA.decrypt(await user.get('3fauth').then(), backupKey))
-        // }
+        helpFriend()
+        let key = localStorage.getItem("userkey")
+        key && login(JSON.parse(key))
 
 
-        checkLocalStorage()
-        $("#register-button").click(register)
-        $("#login-button").click(() => {
-            login(JSON.parse($("#key").val()))
-        })
-
-        $("#logout-button").click(logout)
-        $("#login-navigate").on('click', () => {
+        // Navigation Logic
+        $("#login-navigate").click(() => {
             swap("login-navigate", "register-navigate");
             swap("register-section", "login-section")
             $("#forgot-navigate").show();
         })
-        $("#forgot-navigate").click(forgotPassword)
-
-        $("#addPub").click(() => {
-            addPubs($("#pub").val())
-        });
+        $("#forgot-navigate").click(() => {
+            swap("welcome", "lost")
+        })
         $("#register-navigate").click(() => {
             swap("register-navigate", "login-navigate");
             swap("login-section", "register-section")
             $("#forgot-navigate").hide();
 
         })
-    })
-
-
+    }
+    init();
 
 </script>
 
