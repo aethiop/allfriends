@@ -225,8 +225,9 @@
                 swap("home", "help")
                 var decryptedPiece = await secretDecrypt(await gun.user(lostPub).get('3fa').get(profile.key.pub).then(), profile.key, lostEpub)
                 $("#lostUsername").text(lostUsername)
-                $("#accept").click(() => {
+                $("#accept").click(async () => {
                     gun.get("approvals").get(hash).set(decryptedPiece)
+                    swap("help", "home")
                 })
             }
         } else if (searchParam.has("pub")) {
