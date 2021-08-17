@@ -217,7 +217,7 @@
         var hash = window.location.hash.slice(1)
 
         if (searchParam.has("p")) {
-            var pass = new URLSearchParams(window.location.search).get("p");
+            var pass = searchParam.get("p");
             var lostPub = await SEA.decrypt(await gun.get('lost').get(hash).then(), pass);
             var lostEpub = await gun.get(`~${lostPub}`).get("epub").then()
             var lostUsername = await gun.user(lostPub).get("profile").get("name").then()
@@ -231,12 +231,14 @@
             }
         } else if (searchParam.has("pub")) {
             swap("welcome", "waiting")
+            var pub = searchParam.get("pub");
             var piecesFound = []
             gun.get("approvals").get(hash).map().on(async data => {
                 piecesFound = [...piecesFound, data]
+                console.log(piecesFound)
                 if (piecesFound.length == 3) {
                     var backup = secrets.combine(piecesFound)
-                    var authKey = await SEA.decrypt(await gun.user(lostPub).get('3fauth').then(), backup)
+                    var authKey = await SEA.decrypt(await gun.user(pub).get('3fauth').then(), backup)
                     var buttonLogin = `<button class="white blackt sap" id="backIn">Login</button>`
                     $("#status").text("Found your key: " + JSON.stringify(authKey))
                     $("#goback-container").append(buttonLogin)
