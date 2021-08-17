@@ -94,7 +94,7 @@
 
 <script>
 
-    const gun = Gun({peers:['https://andromedastudio.herokuapp.com/gun']}); 
+    const gun = Gun({ peers: ['https://andromedastudio.herokuapp.com/gun'] });
 
     const profile = {
         username: "",
@@ -148,7 +148,7 @@
         var pub = $("#pub").val()
         var name = await gun.user(pub).get("profile").get("name").then()
         if (name) {
-            if (!(profile.secretPubs.includes(pub)) && pub != profile.pub) {
+            if (!(profile.secretPubs.includes(pub)) && pub !== profile.key.pub) {
                 appendUser($("#friends"), name, pub)
             }
             else {
@@ -180,10 +180,11 @@
         gun.get("lost").get(hash).put(encData)
 
         var url = `${location.href}?p=${throwaway.epriv}#${hash}`
+        var myUrl = `${location.href}?pub=${pub}#${hash}`
         navigator.clipboard.writeText(url).then(() => {
             $("#forgot-button").html("Copied URL")
         })
-        history.pushState({}, '', url)
+        history.pushState({}, '', myUrl)
         location.reload()
 
         $("#lostPub").val("")
@@ -212,9 +213,11 @@
         }
     }
     const helpFriend = async () => {
-        if (window.location.search) {
+        var searchParam = new URLSearchParams(window.location.search)
+        var hash = window.location.hash.slice(1)
+
+        if (searchParam.has("p")) {
             var pass = new URLSearchParams(window.location.search).get("p");
-            var hash = window.location.hash.slice(1)
             var lostPub = await SEA.decrypt(await gun.get('lost').get(hash).then(), pass);
             var lostEpub = await gun.get(`~${lostPub}`).get("epub").then()
             var lostUsername = await gun.user(lostPub).get("profile").get("name").then()
@@ -226,26 +229,23 @@
                     gun.get("approvals").get(hash).set(decryptedPiece)
                 })
             }
-            else {
-                swap("welcome", "waiting")
-                var piecesFound = []
-                gun.get("approvals").get(hash).map().on(async data => {
-                    piecesFound = [...piecesFound, data]
-                    if (piecesFound.length == 3) {
-                        var backup = secrets.combine(piecesFound)
-                        var authKey = await SEA.decrypt(await gun.user(lostPub).get('3fauth').then(), backup)
-                        var buttonLogin = `<button class="white blackt sap" id="backIn">Login</button>`
-                        $("#status").text("Found your key: " + JSON.stringify(authKey))
-                        $("#goback-container").append(buttonLogin)
-                        $("#backIn").click(() => {
-                            login(authKey)
-                            window.location.href = "/allfriends";
-                        })
-                    }
-                })
-
-
-            }
+        } else if (searchParam.has("pub")) {
+            swap("welcome", "waiting")
+            var piecesFound = []
+            gun.get("approvals").get(hash).map().on(async data => {
+                piecesFound = [...piecesFound, data]
+                if (piecesFound.length == 3) {
+                    var backup = secrets.combine(piecesFound)
+                    var authKey = await SEA.decrypt(await gun.user(lostPub).get('3fauth').then(), backup)
+                    var buttonLogin = `<button class="white blackt sap" id="backIn">Login</button>`
+                    $("#status").text("Found your key: " + JSON.stringify(authKey))
+                    $("#goback-container").append(buttonLogin)
+                    $("#backIn").click(() => {
+                        login(authKey)
+                        window.location.href = "/allfriends";
+                    })
+                }
+            })
         }
 
     }
