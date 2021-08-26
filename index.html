@@ -91,26 +91,21 @@
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/gun/lib/fun.js"></script>
 <script src="./secrets.min.js"></script>
+<script src="./3fa.js"></script>
 
 <script>
 
-    const gun = Gun({ peers: ['https://andromedastudio.herokuapp.com/gun'] });
-
+    const gun = Gun({ peers: ['https://andromeda.herokuapp.com/gun'] });
     const profile = {
         username: "",
         key: {},
         secretPubs: []
     }
-
     const user = gun.user();
-
-
-    //Helpers
     const swap = (current, next) => {
         $("#" + current).hide()
         $("#" + next).show()
     }
-
     const appendUser = (to, name, pub) => {
         var user = `<div id='${pub}' class="bolder blackt"> ${name}</div>`;
         to.append(user)
@@ -125,14 +120,11 @@
             user.get("epub").put(user._.sea.epub)
             $("#username").val("")
         })
-
     }
-    // Login using key
-    const login = async (key) => {
-        user.auth(key);
 
+    const login = async (k) => {
+        user.auth(k);
         localStorage.setItem("userkey", JSON.stringify(key));
-        console.log("Key: ", JSON.stringify(key));
         if (user.is) {
             var username = await user.get("profile").get("name").then()
             $("#title").html(`Welcome <span class="blackt">${username}</span>`)
@@ -142,6 +134,13 @@
         }
         $("#key").val("")
         $("#waiting").hide()
+
+        gun.init3fa(pubs => {
+            pubs.length === 3 && pubs.forEach(async (pub) => {
+                var name = await gun.user(pub).get("profile").get("name").then()
+                appendUser($("#friends"), name, pub)
+            })
+        })
     }
 
     const addPubs = async () => {
@@ -158,37 +157,23 @@
             profile.secretPubs = [...profile.secretPubs, pub]
         }
         $("#pub").val("")
-
-
     }
 
-
     const forgotPassword = async () => {
-        // Get the public key 
+
         var pub = $("#lostPub").val()
         var name = await gun.user(pub).get('profile').get('name').then()
-        console.log(name)
 
-        // Create a throwaway key and encrypt the pub with the key
-        var throwaway = await SEA.pair();
-
-        var hash = await SEA.work(throwaway.pub, null, null, { name: "SHA-256", encode: 'hex' });
-
-        var encData = await SEA.encrypt(pub, throwaway)
-
-
-        gun.get("lost").get(hash).put(encData)
-
-        var url = `${location.href}?p=${throwaway.epriv}#${hash}`
-        var myUrl = `${location.href}?pub=${pub}#${hash}`
-        navigator.clipboard.writeText(url).then(() => {
-            $("#forgot-button").html("Copied URL")
+        gun.forget3fa(pub, (pass, hash) => {
+            var url = `${location.href}?p=${pass}#${hash}`
+            var myUrl = `${location.href}?pub=${pub}#${hash}`
+            navigator.clipboard.writeText(url).then(() => {
+                $("#forgot-button").html("Copied URL")
+            })
+            history.pushState({}, '', myUrl)
+            location.reload()
+            $("#lostPub").val("")
         })
-        history.pushState({}, '', myUrl)
-        location.reload()
-
-        $("#lostPub").val("")
-
     }
 
     const logout = () => {
@@ -201,69 +186,39 @@
     const secretEncrypt = async (data, key, epub) => await SEA.encrypt(data, await SEA.secret(epub, key))
     const secretDecrypt = async (data, key, epub) => await SEA.decrypt(data, await SEA.secret(epub, key))
     const setup3FA = async () => {
-        if (profile.secretPubs.length >= 3) {
-            const backupKey = SEA.random(128).toString('hex')
-            user.get('3fauth').put(await SEA.encrypt(user._.sea, backupKey))
-            const pieces = secrets.share(backupKey, 5, 3)
-            profile.secretPubs.forEach(async (pub, index) => {
-                const epub = await gun.get(`~${pub}`).get("epub").then()
-                var encrypted = await secretEncrypt(pieces[index], user._.sea, epub)
-                user.get('3fa').get(pub).put(encrypted)
-            })
-        }
+        gun.setup3fa(profile.secretPubs, profile.key)
     }
+
     const helpFriend = async () => {
         var searchParam = new URLSearchParams(window.location.search)
         var hash = window.location.hash.slice(1)
+        var key = localStorage.getItem("userkey")
 
-        if (searchParam.has("p")) {
+        if (searchParam.has("p") && key) {
+            swap("home", "help")
             var pass = searchParam.get("p");
-            var lostPub = await SEA.decrypt(await gun.get('lost').get(hash).then(), pass);
-            var lostEpub = await gun.get(`~${lostPub}`).get("epub").then()
-            var lostUsername = await gun.user(lostPub).get("profile").get("name").then()
-            if (user.is) {
-                swap("home", "help")
-                var decryptedPiece = await secretDecrypt(await gun.user(lostPub).get('3fa').get(profile.key.pub).then(), profile.key, lostEpub)
-                $("#lostUsername").text(lostUsername)
+            gun.help3fa(hash, pass, JSON.parse(key), async (pub, dec) => {
+                var u = await gun.user(pub).get("profile").get("name").then()
+                $("#lostUsername").text(u)
                 $("#accept").click(async () => {
-                    gun.get("approvals").get(hash).set(decryptedPiece)
+                    gun.get("approved").get(hash).set(dec)
                     swap("help", "home")
                 })
-            }
+            })
         } else if (searchParam.has("pub")) {
             swap("welcome", "waiting")
             var pub = searchParam.get("pub");
-            var piecesFound = []
-            gun.get("approvals").get(hash).map().on(async data => {
-                piecesFound = [...piecesFound, data]
-                console.log(piecesFound)
-                if (piecesFound.length == 3) {
-                    var backup = secrets.combine(piecesFound)
-                    var authKey = await SEA.decrypt(await gun.user(pub).get('3fauth').then(), backup)
-                    var buttonLogin = `<button class="white blackt sap" id="backIn">Login</button>`
-                    $("#status").text("Found your key: " + JSON.stringify(authKey))
-                    $("#goback-container").append(buttonLogin)
-                    $("#backIn").click(() => {
-                        login(authKey)
-                        window.location.href = "/allfriends";
-                    })
-                }
-            })
+            gun.wait3fa(pub, hash)
         }
-
     }
 
     $("#ignore").click(() => {
         window.location.href = "/allfriends"
     })
     const init = async () => {
-
-        // Check local storage for key
-
         helpFriend()
         let key = localStorage.getItem("userkey")
         key && login(JSON.parse(key))
-
 
         // Navigation Logic
         $("#login-navigate").click(() => {
